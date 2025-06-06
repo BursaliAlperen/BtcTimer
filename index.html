@@ -588,46 +588,4 @@
         const musicSlider = document.getElementById('music-slider');
         
         volumeSlider.addEventListener('input', () => {
-            engineSound.volume = volumeSlider.value;
-            crashSound.volume = volumeSlider.value;
-            collectSound.volume = volumeSlider.value;
-            nitroSound.volume = volumeSlider.value;
-        });
-        
-        musicSlider.addEventListener('input', () => {
-            backgroundMusic.volume = musicSlider.value;
-        });
-        
-        // Menu Buttons
-        document.getElementById('start-button').addEventListener('click', startGame);
-        document.getElementById('settings-button').addEventListener('click', () => {
-            startMenu.style.display = 'none';
-            settingsMenu.style.display = 'block';
-        });
-        document.getElementById('customization-button').addEventListener('click', () => {
-            startMenu.style.display = 'none';
-            customizationMenu.style.display = 'block';
-        });
-        document.getElementById('settings-back-button').addEventListener('click', () => {
-            settingsMenu.style.display = 'none';
-            startMenu.style.display = 'block';
-        });
-        document.getElementById('customization-back-button').addEventListener('click', () => {
-            customizationMenu.style.display = 'none';
-            startMenu.style.display = 'block';
-        });
-        restartButton.addEventListener('click', restartGame);
-        
-        // Color customization
-        const colorOptions = document.querySelectorAll('.color-option');
-        let selectedCarColor = new THREE.Color(0xe74c3c); // Default car color
 
-        colorOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                // Remove 'selected' class from all options
-                colorOptions.forEach(opt => opt.classList.remove('selected'));
-                // Add 'selected' class to the clicked option
-                option.classList.add('selected');
-                
-                // Update car color
-                selectedCarColo
