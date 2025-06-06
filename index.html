@@ -1,24 +1,17 @@
-<!DOCTYPE html>
+9abe316"></div><!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Araba Yarışı Oyunu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Araba Yarışı</title>
     <style>
         /* TEMEL STİLLER */
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #121212;
-            color: white;
             overflow: hidden;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            touch-action: manipulation;
         }
 
         /* MENÜ STİLLERİ */
@@ -40,6 +33,7 @@
         .menu h1 {
             color: #3498db;
             margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
         }
 
         .menu-button {
@@ -61,305 +55,196 @@
             box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
-        /* AYARLAR MENÜSÜ */
-        #settings-menu, #customization-menu {
+        /* OYUN EKRANI */
+        #game-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: none;
         }
 
-        .slider-container {
-            margin: 20px 0;
-        }
-
-        .slider-container label {
+        #game-canvas {
             display: block;
-            margin-bottom: 10px;
+            width: 100%;
+            height: 100%;
         }
 
-        /* ÖZELLEŞTİRME MENÜSÜ */
-        .color-options {
+        /* OYUN UI */
+        #game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            text-shadow: 1px 1px 3px black;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* KONTROL BUTONLARI */
+        #game-controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
             display: flex;
             justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 20px;
         }
 
-        .color-option {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        #game-controls button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: rgba(52, 152, 219, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50px;
             cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .color-option.selected {
-            border: 3px solid white;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            border: 2px solid white;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- ANA MENÜ -->
-        <div id="main-menu" class="menu">
-            <h1>ARABA YARIŞI</h1>
-            <button id="start-button" class="menu-button">OYUNA BAŞLA</button>
-            <button id="settings-button" class="menu-button">AYARLAR</button>
-            <button id="customization-button" class="menu-button">ÖZELLEŞTİR</button>
-        </div>
+    <!-- ANA MENÜ -->
+    <div id="main-menu" class="menu">
+        <h1>3D ARAÇ YARIŞI</h1>
+        <button id="start-button" class="menu-button">OYUNA BAŞLA</button>
+        <button id="settings-button" class="menu-button">AYARLAR</button>
+        <button id="customization-button" class="menu-button">ÖZELLEŞTİR</button>
+    </div>
 
-        <!-- AYARLAR MENÜSÜ -->
-        <div id="settings-menu" class="menu">
-            <h1>AYARLAR</h1>
-            <div class="slider-container">
-                <label for="volume-slider">SES SEVİYESİ</label>
-                <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
-            </div>
-            <div class="slider-container">
-                <label for="music-slider">MÜZİK SEVİYESİ</label>
-                <input type="range" id="music-slider" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <button id="settings-back-button" class="menu-button">GERİ DÖN</button>
+    <!-- OYUN EKRANI -->
+    <div id="game-screen">
+        <canvas id="game-canvas"></canvas>
+        
+        <div id="game-ui">
+            <div>SKOR: <span id="score-display">0</span></div>
+            <div>HIZ: <span id="speed-display">0</span> km/h</div>
         </div>
-
-        <!-- ÖZELLEŞTİRME MENÜSÜ -->
-        <div id="customization-menu" class="menu">
-            <h1>ÖZELLEŞTİR</h1>
-            <h3>Araba Rengi</h3>
-            <div class="color-options">
-                <div class="color-option selected" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
-                <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
-                <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
-                <div class="color-option" style="background-color: #f1c40f;" data-color="#f1c40f"></div>
-                <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
-            </div>
-            <button id="customization-back-button" class="menu-button">GERİ DÖN</button>
+        
+        <div id="game-controls">
+            <button id="pause-button">DURDUR</button>
+            <button id="back-to-menu">MENÜ</button>
         </div>
     </div>
 
     <script>
-        // MENÜ KONTROLLERİ
-        document.addEventListener('DOMContentLoaded', function() {
-            // Buton elementlerini seç
-            const startButton = document.getElementById('start-button');
-            const settingsButton = document.getElementById('settings-button');
-            const customizationButton = document.getElementById('customization-button');
-            const settingsBackButton = document.getElementById('settings-back-button');
-            const customizationBackButton = document.getElementById('customization-back-button');
+        // OYUN DEĞİŞKENLERİ
+        let gameActive = false;
+        let score = 0;
+        let speed = 0;
+        let gameCanvas, gameContext;
+        let animationFrameId;
+
+        // ELEMANLARI SEÇ
+        const startButton = document.getElementById('start-button');
+        const settingsButton = document.getElementById('settings-button');
+        const customizationButton = document.getElementById('customization-button');
+        const pauseButton = document.getElementById('pause-button');
+        const backToMenuButton = document.getElementById('back-to-menu');
+        const scoreDisplay = document.getElementById('score-display');
+        const speedDisplay = document.getElementById('speed-display');
+        const gameScreen = document.getElementById('game-screen');
+        const mainMenu = document.getElementById('main-menu');
+
+        // OYUNU BAŞLAT
+        function startGame() {
+            mainMenu.style.display = 'none';
+            gameScreen.style.display = 'block';
             
-            // Menü geçiş fonksiyonları
-            function showMainMenu() {
-                document.getElementById('main-menu').style.display = 'block';
-                document.getElementById('settings-menu').style.display = 'none';
-                document.getElementById('customization-menu').style.display = 'none';
+            // Canvas ayarları
+            gameCanvas = document.getElementById('game-canvas');
+            gameCanvas.width = window.innerWidth;
+            gameCanvas.height = window.innerHeight;
+            gameContext = gameCanvas.getContext('2d');
+            
+            // Oyun durumu
+            gameActive = true;
+            score = 0;
+            speed = 0;
+            
+            // Oyun döngüsünü başlat
+            gameLoop();
+        }
+
+        // OYUN DÖNGÜSÜ
+        function gameLoop() {
+            if (!gameActive) return;
+            
+            // Temizle
+            gameContext.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+            
+            // Arka plan
+            gameContext.fillStyle = '#a0d7e6';
+            gameContext.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+            
+            // Yol çiz
+            gameContext.fillStyle = '#555555';
+            const roadWidth = gameCanvas.width * 0.6;
+            const roadX = (gameCanvas.width - roadWidth) / 2;
+            gameContext.fillRect(roadX, 0, roadWidth, gameCanvas.height);
+            
+            // Araba çiz (basit bir dikdörtgen)
+            gameContext.fillStyle = '#e74c3c';
+            const carWidth = 50;
+            const carHeight = 100;
+            const carX = gameCanvas.width / 2 - carWidth / 2;
+            const carY = gameCanvas.height - carHeight - 50;
+            gameContext.fillRect(carX, carY, carWidth, carHeight);
+            
+            // Skor ve hızı güncelle
+            score += 1;
+            speed = Math.min(120, speed + 0.1);
+            
+            scoreDisplay.textContent = score;
+            speedDisplay.textContent = Math.floor(speed);
+            
+            // Oyun döngüsünü devam ettir
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // OYUNU DURDUR
+        function pauseGame() {
+            gameActive = !gameActive;
+            pauseButton.textContent = gameActive ? 'DURDUR' : 'DEVAM ET';
+            if (gameActive) {
+                gameLoop();
+            } else {
+                cancelAnimationFrame(animationFrameId);
             }
-            
-            function showSettings() {
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('settings-menu').style.display = 'block';
-                document.getElementById('customization-menu').style.display = 'none';
-            }
-            
-            function showCustomization() {
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('settings-menu').style.display = 'none';
-                document.getElementById('customization-menu').style.display = 'block';
-            }
-            
-            // Buton event listener'ları
-            startButton.addEventListener('click', function() {
-                alert('Oyun başlatılıyor!');
-                // Buraya oyun başlatma kodlarınızı ekleyin
-            });
-            
-            settingsButton.addEventListener('click', showSettings);
-            customizationButton.addEventListener('click', showCustomization);
-            settingsBackButton.addEventListener('click', showMainMenu);
-            customizationBackButton.addEventListener('click', showMainMenu);
-            
-            // Renk seçimi
-            const colorOptions = document.querySelectorAll('.color-option');
-            colorOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    colorOptions.forEach(opt => opt.classList.remove('selected'));
-                    this.classList.add('selected');
-                    const selectedColor = this.getAttribute('data-color');
-                    alert(`Seçilen renk: ${selectedColor}`);
-                    // Burada araba rengini değiştirme kodlarınızı ekleyin
-                });
-            });
-            
-            // Ses ayarları
-            const volumeSlider = document.getElementById('volume-slider');
-            const musicSlider = document.getElementById('music-slider');
-            
-            volumeSlider.addEventListener('input', function() {
-                console.log(`Ses seviyesi: ${this.value}`);
-                // Ses seviyesi ayarını burada uygulayın
-            });
-            
-            musicSlider.addEventListener('input', function() {
-                console.log(`Müzik seviyesi: ${this.value}`);
-                // Müzik seviyesi ayarını burada uygulayın
-            });
-        });
-    </script>
-</body>
-    </html>
-html
-<!-- Ana menüden sonra bu kodu ekleyin -->
-<div id="game-screen" style="display: none;">
-    <!-- Oyun canvas'ı -->
-    <canvas id="game-canvas"></canvas>
-    
-    <!-- Oyun UI elemanları -->
-    <div id="game-ui">
-        <div id="score-display">Skor: 0</div>
-        <div id="speed-display">Hız: 0 km/h</div>
-    </div>
-    
-    <!-- Oyun kontrolleri -->
-    <div id="game-controls">
-        <button id="pause-button">Durdur</button>
-        <button id="back-to-menu">Menüye Dön</button>
-    </div>
-</div>
-javascript
-// Oyun değişkenleri
-let gameActive = false;
-let gameCanvas, gameContext;
+        }
 
-// Oyun başlatma fonksiyonu
-function startGame() {
-    // Menüyü gizle
-    document.getElementById('main-menu').style.display = 'none';
-    
-    // Oyun ekranını göster
-    const gameScreen = document.getElementById('game-screen');
-    gameScreen.style.display = 'block';
-    
-    // Canvas'ı ayarla
-    gameCanvas = document.getElementById('game-canvas');
-    gameCanvas.width = window.innerWidth;
-    gameCanvas.height = window.innerHeight;
-    gameContext = gameCanvas.getContext('2d');
-    
-    // Oyun durumunu aktif et
-    gameActive = true;
-    
-    // Oyun döngüsünü başlat
-    gameLoop();
-}
+        // MENÜYE DÖN
+        function returnToMenu() {
+            cancelAnimationFrame(animationFrameId);
+            gameScreen.style.display = 'none';
+            mainMenu.style.display = 'block';
+            gameActive = false;
+        }
 
-// Oyun döngüsü
-function gameLoop() {
-    if (!gameActive) return;
-    
-    // Temizle
-    gameContext.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-    
-    // Arka plan
-    gameContext.fillStyle = '#a0d7e6';
-    gameContext.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-    
-    // Basit bir araba çizimi (örnek)
-    gameContext.fillStyle = '#e74c3c';
-    gameContext.fillRect(100, 100, 50, 100);
-    
-    // Oyun döngüsünü devam ettir
-    requestAnimationFrame(gameLoop);
-}
-
-// Pause butonu
-document.getElementById('pause-button').addEventListener('click', function() {
-    gameActive = !gameActive;
-    this.textContent = gameActive ? 'Durdur' : 'Devam Et';
-    if (gameActive) gameLoop();
-});
-
-// Menüye dön butonu
-document.getElementById('back-to-menu').addEventListener('click', function() {
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('main-menu').style.display = 'block';
-    gameActive = false;
-});
-css
-/* Oyun Ekranı Stilleri */
-#game-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #121212;
-}
-
-#game-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-#game-ui {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    color: white;
-    font-size: 18px;
-}
-
-#game-controls {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-#game-controls button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-html
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Araba Yarışı Oyunu</title>
-    <style>
-        /* Önceki menü stillerini buraya ekleyin */
-        /* Yeni oyun ekranı stillerini buraya ekleyin */
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <!-- Önceki menü HTML'ini buraya ekleyin -->
-        
-        <!-- Yeni oyun ekranı HTML'ini buraya ekleyin -->
-    </div>
-
-    <script>
-        // Önceki menü JavaScript kodunu buraya ekleyin
-        
-        // Yeni oyun başlatma kodunu buraya ekleyin
-        
-        // Pencere boyutu değiştiğinde canvas'ı yeniden boyutlandır
+        // PENCERE BOYUTU DEĞİŞTİĞİNDE
         window.addEventListener('resize', function() {
             if (gameCanvas) {
                 gameCanvas.width = window.innerWidth;
                 gameCanvas.height = window.innerHeight;
             }
         });
+
+        // OLAYLARI BAĞLA
+        startButton.addEventListener('click', startGame);
+        pauseButton.addEventListener('click', pauseGame);
+        backToMenuButton.addEventListener('click', returnToMenu);
+
+        // AYARLAR ve ÖZELLEŞTİRME BUTONLARI (Örnek)
+        settingsButton.addEventListener('click', function() {
+            alert('Ayarlar menüsü burada olacak');
+        });
+        
+        customizationButton.addEventListener('click', function() {
+            alert('Özelleştirme menüsü burada olacak');
+        });
     </script>
 </body>
 </html>
-<script async="async" data-cfasync="false" src="//pl26855251.profitableratecpm.com/55315d059ad71bbc103cdee729abe316/invoke.js"></script>
-<div id="container-55315d059ad71bbc103cdee729abe316"></div>
