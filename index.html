@@ -1,316 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Araba Yarışı - Gelişmiş Sürüm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araba Yarışı Oyunu</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* TEMEL STİLLER */
         body {
             margin: 0;
-            overflow: hidden;
-            background-color: #1a1a2e;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overscroll-behavior: none;
-            touch-action: none;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        canvas {
-            display: block;
-        }
-
-        #loading-screen {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #0f0f1b;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.8em;
-            z-index: 100;
-            opacity: 1;
-            transition: opacity 0.5s ease-out;
-        }
-
-        #loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .progress-bar {
-            width: 300px;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
-            margin-top: 20px;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: white;
             overflow: hidden;
         }
 
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff2d75, #ff7b00);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        /* --- Game Containers --- */
         #game-container {
             position: relative;
-            width: 100%;
-            height: 100%;
-            display: none;
+            width: 100vw;
+            height: 100vh;
         }
 
-        #container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* --- UI Elements --- */
-        #ui-container {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            z-index: 50;
-            font-size: 1.2em;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 15px;
-            border-radius: 10px;
-            display: flex;
-            gap: 20px;
-        }
-
-        #score {
-            font-weight: bold;
-            color: #ffd700;
-        }
-
-        #game-over {
+        /* MENÜ STİLLERİ */
+        .menu {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #ff4444;
-            font-size: 4em;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 2px 2px 5px black;
-            display: none;
-            z-index: 101;
-            pointer-events: none;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        /* --- Mobile Control Buttons --- */
-        .control-button {
-            position: absolute;
-            bottom: 30px;
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.25);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            z-index: 60;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5em;
-            color: rgba(255, 255, 255, 0.9);
-            cursor: pointer;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            backdrop-filter: blur(5px);
-            transition: all 0.1s;
-        }
-
-        .control-button:active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0.95);
-        }
-
-        #left-button {
-            left: 30px;
-        }
-
-        #right-button {
-            right: 30px;
-        }
-
-        #nitro-button {
-            right: 30px;
-            bottom: 130px;
-            background: rgba(255, 106, 0, 0.3);
-            border-color: rgba(255, 106, 0, 0.7);
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #ff6a00;
-        }
-
-        /* --- Menus --- */
-        .game-menu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(10, 10, 30, 0.95);
+            background: rgba(0, 0, 0, 0.8);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            z-index: 200;
+            z-index: 100;
             width: 90%;
-            max-width: 500px;
-            box-shadow: 0 0 30px rgba(0, 0, 100, 0.5);
-            border: 1px solid #3498db;
-            backdrop-filter: blur(10px);
+            max-width: 400px;
+            border: 2px solid #3498db;
         }
 
-        .game-menu h1 {
+        .menu h1 {
             color: #3498db;
-            margin-bottom: 25px;
-            font-size: 2.5em;
-            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
-        }
-
-        .game-menu h2 {
-            color: #2ecc71;
             margin-bottom: 20px;
-            font-size: 1.8em;
         }
 
-        .game-menu button {
+        .menu-button {
             display: block;
             width: 100%;
-            margin: 15px 0;
             padding: 15px;
-            font-size: 1.2em;
-            cursor: pointer;
-            background: linear-gradient(to right, #3498db, #2980b9);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .game-menu button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(to right, #3ca0db, #2c8dc9);
-        }
-
-        .game-menu button:active {
-            transform: translateY(0);
-        }
-
-        .menu-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-
-        label {
-            display: block;
-            color: #ecf0f1;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        input[type="range"] {
-            width: 100%;
             margin: 10px 0;
-            height: 10px;
-            border-radius: 5px;
-            background: #2c3e50;
-            outline: none;
-        }
-
-        /* --- HUD Elements --- */
-        #hud {
-            position: absolute;
-            top: 15px;
-            right: 15px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
             color: white;
-            font-size: 1.1em;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
-            z-index: 50;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 15px;
-            border-radius: 10px;
-            min-width: 150px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        #fuel-bar-container {
-            width: 100%;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            margin-top: 8px;
-            border-radius: 5px;
-            overflow: hidden;
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
-        #fuel-bar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #2ecc71, #f1c40f);
-            transition: width 0.3s;
+        /* AYARLAR MENÜSÜ */
+        #settings-menu, #customization-menu {
+            display: none;
         }
 
-        #nitro-bar-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            margin-top: 15px;
-            border-radius: 5px;
-            overflow: hidden;
+        .slider-container {
+            margin: 20px 0;
         }
 
-        #nitro-bar {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff6a00, #ff2d75);
-            transition: width 0.3s;
+        .slider-container label {
+            display: block;
+            margin-bottom: 10px;
         }
 
-        .hud-label {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 0.9em;
-            color: #bdc3c7;
-        }
-
-        /* --- Color Selection --- */
+        /* ÖZELLEŞTİRME MENÜSÜ */
         .color-options {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 15px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
         }
 
         .color-option {
@@ -322,270 +93,117 @@
             transition: all 0.3s;
         }
 
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
         .color-option.selected {
             border: 3px solid white;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
         }
-
-        /* --- Effects --- */
-        .nitro-effect {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(to top, rgba(255, 106, 0, 0.7) 0%, transparent 100%);
-            pointer-events: none;
-            opacity: 0;
-            z-index: 40;
-            transition: opacity 0.3s;
-        }
-
-        /* --- Restart Button --- */
-        #restart-button {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 30px;
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 70;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        /* --- Mobile Layout Adjustments --- */
-        @media (max-width: 768px) {
-            #ui-container {
-                top: 10px;
-                left: 10px;
-                font-size: 1em;
-                padding: 8px 12px;
-            }
-            
-            #hud {
-                top: 10px;
-                right: 10px;
-                font-size: 0.9em;
-                padding: 8px 12px;
-                min-width: 120px;
-            }
-            
-            .control-button {
-                width: 70px;
-                height: 70px;
-                bottom: 20px;
-                font-size: 2em;
-            }
-            
-            #left-button {
-                left: 20px;
-            }
-            
-            #right-button {
-                right: 20px;
-            }
-            
-            #nitro-button {
-                right: 20px;
-                bottom: 110px;
-                font-size: 1.5em;
-            }
-            
-            .game-menu {
-                padding: 20px;
-            }
-            
-            .game-menu h1 {
-                font-size: 2em;
-            }
-        }
     </style>
 </head>
 <body>
-    <div id="loading-screen">
-        <div>Yükleniyor...</div>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-fill"></div>
-        </div>
-    </div>
-
-    <div id="start-menu" class="game-menu">
-        <h1>3D ARAÇ YARIŞI</h1>
-        <button id="start-button">OYUNA BAŞLA</button>
-        <button id="settings-button">AYARLAR</button>
-        <button id="customization-button">ÖZELLEŞTİR</button>
-    </div>
-
-    <div id="settings-menu" class="game-menu" style="display: none;">
-        <h2>AYARLAR</h2>
-        <div class="menu-section">
-            <label for="volume-slider">SES SEVİYESİ</label>
-            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
-        </div>
-        <div class="menu-section">
-            <label for="music-slider">MÜZİK SEVİYESİ</label>
-            <input type="range" id="music-slider" min="0" max="1" step="0.1" value="0.5">
-        </div>
-        <button id="settings-back-button">GERİ</button>
-    </div>
-
-    <div id="customization-menu" class="game-menu" style="display: none;">
-        <h2>ARAÇ ÖZELLEŞTİRME</h2>
-        <div class="menu-section">
-            <h3>ARAÇ RENGİ</h3>
-            <div class="color-options">
-                <div class="color-option selected" style="background-color: #e74c3c;" data-color="0xe74c3c"></div>
-                <div class="color-option" style="background-color: #3498db;" data-color="0x3498db"></div>
-                <div class="color-option" style="background-color: #2ecc71;" data-color="0x2ecc71"></div>
-                <div class="color-option" style="background-color: #f1c40f;" data-color="0xf1c40f"></div>
-                <div class="color-option" style="background-color: #9b59b6;" data-color="0x9b59b6"></div>
-            </div>
-        </div>
-        <button id="customization-back-button">GERİ</button>
-    </div>
-
     <div id="game-container">
-        <div id="container"></div>
-        
-        <div id="ui-container">
-            <div id="score">Skor: 0</div>
-        </div>
-        
-        <div id="game-over">OYUN BİTTİ!</div>
-        
-        <div id="hud">
-            <div>HIZ: <span id="speed-value">0</span> km/h</div>
-            <div id="fuel-bar-container">
-                <div id="fuel-bar"></div>
-            </div>
-            <div class="hud-label">
-                <span>YAKIT</span>
-                <span id="fuel-percent">100%</span>
-            </div>
-            
-            <div id="nitro-bar-container">
-                <div id="nitro-bar"></div>
-            </div>
-            <div class="hud-label">
-                <span>NİTRO</span>
-                <span id="nitro-percent">100%</span>
-            </div>
+        <!-- ANA MENÜ -->
+        <div id="main-menu" class="menu">
+            <h1>ARABA YARIŞI</h1>
+            <button id="start-button" class="menu-button">OYUNA BAŞLA</button>
+            <button id="settings-button" class="menu-button">AYARLAR</button>
+            <button id="customization-button" class="menu-button">ÖZELLEŞTİR</button>
         </div>
 
-        <div id="left-button" class="control-button">◀</div>
-        <div id="right-button" class="control-button">▶</div>
-        <div id="nitro-button" class="control-button">NİTRO</div>
-        
-        <div class="nitro-effect" id="nitro-effect"></div>
-        
-        <button id="restart-button">YENİDEN BAŞLAT</button>
+        <!-- AYARLAR MENÜSÜ -->
+        <div id="settings-menu" class="menu">
+            <h1>AYARLAR</h1>
+            <div class="slider-container">
+                <label for="volume-slider">SES SEVİYESİ</label>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
+            </div>
+            <div class="slider-container">
+                <label for="music-slider">MÜZİK SEVİYESİ</label>
+                <input type="range" id="music-slider" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <button id="settings-back-button" class="menu-button">GERİ DÖN</button>
+        </div>
+
+        <!-- ÖZELLEŞTİRME MENÜSÜ -->
+        <div id="customization-menu" class="menu">
+            <h1>ÖZELLEŞTİR</h1>
+            <h3>Araba Rengi</h3>
+            <div class="color-options">
+                <div class="color-option selected" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                <div class="color-option" style="background-color: #3498db;" data-color="#3498db"></div>
+                <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                <div class="color-option" style="background-color: #f1c40f;" data-color="#f1c40f"></div>
+                <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+            </div>
+            <button id="customization-back-button" class="menu-button">GERİ DÖN</button>
+        </div>
     </div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
+    <script>
+        // MENÜ KONTROLLERİ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Buton elementlerini seç
+            const startButton = document.getElementById('start-button');
+            const settingsButton = document.getElementById('settings-button');
+            const customizationButton = document.getElementById('customization-button');
+            const settingsBackButton = document.getElementById('settings-back-button');
+            const customizationBackButton = document.getElementById('customization-back-button');
+            
+            // Menü geçiş fonksiyonları
+            function showMainMenu() {
+                document.getElementById('main-menu').style.display = 'block';
+                document.getElementById('settings-menu').style.display = 'none';
+                document.getElementById('customization-menu').style.display = 'none';
             }
-        }
+            
+            function showSettings() {
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('settings-menu').style.display = 'block';
+                document.getElementById('customization-menu').style.display = 'none';
+            }
+            
+            function showCustomization() {
+                document.getElementById('main-menu').style.display = 'none';
+                document.getElementById('settings-menu').style.display = 'none';
+                document.getElementById('customization-menu').style.display = 'block';
+            }
+            
+            // Buton event listener'ları
+            startButton.addEventListener('click', function() {
+                alert('Oyun başlatılıyor!');
+                // Buraya oyun başlatma kodlarınızı ekleyin
+            });
+            
+            settingsButton.addEventListener('click', showSettings);
+            customizationButton.addEventListener('click', showCustomization);
+            settingsBackButton.addEventListener('click', showMainMenu);
+            customizationBackButton.addEventListener('click', showMainMenu);
+            
+            // Renk seçimi
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    colorOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const selectedColor = this.getAttribute('data-color');
+                    alert(`Seçilen renk: ${selectedColor}`);
+                    // Burada araba rengini değiştirme kodlarınızı ekleyin
+                });
+            });
+            
+            // Ses ayarları
+            const volumeSlider = document.getElementById('volume-slider');
+            const musicSlider = document.getElementById('music-slider');
+            
+            volumeSlider.addEventListener('input', function() {
+                console.log(`Ses seviyesi: ${this.value}`);
+                // Ses seviyesi ayarını burada uygulayın
+            });
+            
+            musicSlider.addEventListener('input', function() {
+                console.log(`Müzik seviyesi: ${this.value}`);
+                // Müzik seviyesi ayarını burada uygulayın
+            });
+        });
     </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-
-        // Game Elements
-        let scene, camera, renderer, carModel, enemyCar;
-        let ambientLight, directionalLight;
-        let road, roadLines = [], kerbs = [];
-        let buildings = [], streetLights = [], trafficLights = [];
-        const roadWidth = 10;
-        const roadLength = 200;
-        const buildingSpacing = 15;
-        const lightSpacing = 30;
-        const numBuildings = Math.floor(roadLength / buildingSpacing);
-        const numLights = Math.floor(roadLength / lightSpacing);
-        let driveSpeed = 0.5;
-        let speed = 0;
-        const enemyCarSpeed = 0.4;
-        const kerbHeight = 0.2;
-        const kerbWidth = 0.3;
-        
-        // Game State
-        let moveLeft = false;
-        let moveRight = false;
-        const carMoveSpeed = 0.15;
-        let carBaseY = 0;
-        let score = 0;
-        let isGameOver = false;
-        let isPaused = false;
-        let isStarted = false;
-        let nitroActive = false;
-        
-        // Fuel System
-        let fuel = 100;
-        let nitro = 100;
-        const fuelConsumptionRate = 0.1;
-        const nitroConsumptionRate = 0.5;
-        const nitroRechargeRate = 0.2;
-        
-        // Points
-        const points = [];
-        const numPoints = 15;
-        const pointValue = 10;
-        let pointGeometry, pointMaterial;
-        const pointRadius = 0.3;
-        
-        // UI Elements
-        const loadingScreen = document.getElementById('loading-screen');
-        const progressFill = document.getElementById('progress-fill');
-        const scoreElement = document.getElementById('score');
-        const gameOverElement = document.getElementById('game-over');
-        const restartButton = document.getElementById('restart-button');
-        const speedValue = document.getElementById('speed-value');
-        const fuelBar = document.getElementById('fuel-bar');
-        const fuelPercent = document.getElementById('fuel-percent');
-        const nitroBar = document.getElementById('nitro-bar');
-        const nitroPercent = document.getElementById('nitro-percent');
-        const nitroEffect = document.getElementById('nitro-effect');
-        
-        // Menus
-        const startMenu = document.getElementById('start-menu');
-        const settingsMenu = document.getElementById('settings-menu');
-        const customizationMenu = document.getElementById('customization-menu');
-        const gameContainer = document.getElementById('game-container');
-        
-        // Audio
-        const engineSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-car-engine-idle-1457.mp3');
-        const crashSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-car-crash-with-explosion-1613.mp3');
-        const collectSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3');
-        const nitroSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-car-engine-revving-1564.mp3');
-        const backgroundMusic = new Audio('https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-667.mp3');
-        
-        // Set audio properties
-        engineSound.loop = true;
-        backgroundMusic.loop = true;
-        engineSound.volume = 0.7;
-        backgroundMusic.volume = 0.5;
-        crashSound.volume = 0.8;
-        collectSound.volume = 0.7;
-        nitroSound.volume = 0.6;
-        
-        // Volume Sliders
-        const volumeSlider = document.getElementById('volume-slider');
-        const musicSlider = document.getElementById('music-slider');
-        
-        volumeSlider.addEventListener('input', () => {
-
+</body>
+    </html>
