@@ -629,3 +629,59 @@
         
         // Color customization
         con
+        // Mobil Kontroller - Düzeltilmiş Versiyon
+function setupMobileControls() {
+    const leftButton = document.getElementById('left-button');
+    const rightButton = document.getElementById('right-button');
+    const nitroButton = document.getElementById('nitro-button');
+
+    // Sol Buton için
+    leftButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        moveLeft = true;
+    }, { passive: false });
+
+    leftButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        moveLeft = false;
+    }, { passive: false });
+
+    leftButton.addEventListener('mousedown', () => moveLeft = true);
+    leftButton.addEventListener('mouseup', () => moveLeft = false);
+    leftButton.addEventListener('mouseleave', () => moveLeft = false);
+
+    // Sağ Buton için
+    rightButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        moveRight = true;
+    }, { passive: false });
+
+    rightButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        moveRight = false;
+    }, { passive: false });
+
+    rightButton.addEventListener('mousedown', () => moveRight = true);
+    rightButton.addEventListener('mouseup', () => moveRight = false);
+    rightButton.addEventListener('mouseleave', () => moveRight = false);
+
+    // Nitro Butonu için
+    nitroButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        activateNitro();
+    }, { passive: false });
+
+    nitroButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        deactivateNitro();
+    }, { passive: false });
+
+    nitroButton.addEventListener('mousedown', activateNitro);
+    nitroButton.addEventListener('mouseup', deactivateNitro);
+    nitroButton.addEventListener('mouseleave', deactivateNitro);
+}
+
+// Oyun başlatılırken bu fonksiyonu çağırın
+init();
+setupMobileControls(); // Bu satırı ekleyin
+animate();
