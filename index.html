@@ -420,7 +420,6 @@
         </div>
     </div>
 
-    <!-- Start Menu -->
     <div id="start-menu" class="game-menu">
         <h1>3D ARAÇ YARIŞI</h1>
         <button id="start-button">OYUNA BAŞLA</button>
@@ -428,7 +427,6 @@
         <button id="customization-button">ÖZELLEŞTİR</button>
     </div>
 
-    <!-- Settings Menu -->
     <div id="settings-menu" class="game-menu" style="display: none;">
         <h2>AYARLAR</h2>
         <div class="menu-section">
@@ -442,7 +440,6 @@
         <button id="settings-back-button">GERİ</button>
     </div>
 
-    <!-- Customization Menu -->
     <div id="customization-menu" class="game-menu" style="display: none;">
         <h2>ARAÇ ÖZELLEŞTİRME</h2>
         <div class="menu-section">
@@ -458,11 +455,9 @@
         <button id="customization-back-button">GERİ</button>
     </div>
 
-    <!-- Game Container -->
     <div id="game-container">
         <div id="container"></div>
         
-        <!-- UI Elements -->
         <div id="ui-container">
             <div id="score">Skor: 0</div>
         </div>
@@ -488,19 +483,15 @@
             </div>
         </div>
 
-        <!-- Mobile Controls -->
         <div id="left-button" class="control-button">◀</div>
         <div id="right-button" class="control-button">▶</div>
         <div id="nitro-button" class="control-button">NİTRO</div>
         
-        <!-- Effects -->
         <div class="nitro-effect" id="nitro-effect"></div>
         
-        <!-- Restart Button -->
         <button id="restart-button">YENİDEN BAŞLAT</button>
     </div>
 
-    <!-- Import Maps -->
     <script type="importmap">
         {
             "imports": {
@@ -628,60 +619,9 @@
         restartButton.addEventListener('click', restartGame);
         
         // Color customization
-        con
-        // Mobil Kontroller - Düzeltilmiş Versiyon
-function setupMobileControls() {
-    const leftButton = document.getElementById('left-button');
-    const rightButton = document.getElementById('right-button');
-    const nitroButton = document.getElementById('nitro-button');
+        const colorOptions = document.querySelectorAll('.color-option');
+        let selectedCarColor = new THREE.Color(0xe74c3c); // Default car color
 
-    // Sol Buton için
-    leftButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        moveLeft = true;
-    }, { passive: false });
-
-    leftButton.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        moveLeft = false;
-    }, { passive: false });
-
-    leftButton.addEventListener('mousedown', () => moveLeft = true);
-    leftButton.addEventListener('mouseup', () => moveLeft = false);
-    leftButton.addEventListener('mouseleave', () => moveLeft = false);
-
-    // Sağ Buton için
-    rightButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        moveRight = true;
-    }, { passive: false });
-
-    rightButton.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        moveRight = false;
-    }, { passive: false });
-
-    rightButton.addEventListener('mousedown', () => moveRight = true);
-    rightButton.addEventListener('mouseup', () => moveRight = false);
-    rightButton.addEventListener('mouseleave', () => moveRight = false);
-
-    // Nitro Butonu için
-    nitroButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        activateNitro();
-    }, { passive: false });
-
-    nitroButton.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        deactivateNitro();
-    }, { passive: false });
-
-    nitroButton.addEventListener('mousedown', activateNitro);
-    nitroButton.addEventListener('mouseup', deactivateNitro);
-    nitroButton.addEventListener('mouseleave', deactivateNitro);
-}
-
-// Oyun başlatılırken bu fonksiyonu çağırın
-init();
-setupMobileControls(); // Bu satırı ekleyin
-animate();
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+  
