@@ -207,3 +207,157 @@
     </script>
 </body>
     </html>
+html
+<!-- Ana menüden sonra bu kodu ekleyin -->
+<div id="game-screen" style="display: none;">
+    <!-- Oyun canvas'ı -->
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- Oyun UI elemanları -->
+    <div id="game-ui">
+        <div id="score-display">Skor: 0</div>
+        <div id="speed-display">Hız: 0 km/h</div>
+    </div>
+    
+    <!-- Oyun kontrolleri -->
+    <div id="game-controls">
+        <button id="pause-button">Durdur</button>
+        <button id="back-to-menu">Menüye Dön</button>
+    </div>
+</div>
+javascript
+// Oyun değişkenleri
+let gameActive = false;
+let gameCanvas, gameContext;
+
+// Oyun başlatma fonksiyonu
+function startGame() {
+    // Menüyü gizle
+    document.getElementById('main-menu').style.display = 'none';
+    
+    // Oyun ekranını göster
+    const gameScreen = document.getElementById('game-screen');
+    gameScreen.style.display = 'block';
+    
+    // Canvas'ı ayarla
+    gameCanvas = document.getElementById('game-canvas');
+    gameCanvas.width = window.innerWidth;
+    gameCanvas.height = window.innerHeight;
+    gameContext = gameCanvas.getContext('2d');
+    
+    // Oyun durumunu aktif et
+    gameActive = true;
+    
+    // Oyun döngüsünü başlat
+    gameLoop();
+}
+
+// Oyun döngüsü
+function gameLoop() {
+    if (!gameActive) return;
+    
+    // Temizle
+    gameContext.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    
+    // Arka plan
+    gameContext.fillStyle = '#a0d7e6';
+    gameContext.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+    
+    // Basit bir araba çizimi (örnek)
+    gameContext.fillStyle = '#e74c3c';
+    gameContext.fillRect(100, 100, 50, 100);
+    
+    // Oyun döngüsünü devam ettir
+    requestAnimationFrame(gameLoop);
+}
+
+// Pause butonu
+document.getElementById('pause-button').addEventListener('click', function() {
+    gameActive = !gameActive;
+    this.textContent = gameActive ? 'Durdur' : 'Devam Et';
+    if (gameActive) gameLoop();
+});
+
+// Menüye dön butonu
+document.getElementById('back-to-menu').addEventListener('click', function() {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('main-menu').style.display = 'block';
+    gameActive = false;
+});
+css
+/* Oyun Ekranı Stilleri */
+#game-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #121212;
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#game-ui {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 18px;
+}
+
+#game-controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#game-controls button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araba Yarışı Oyunu</title>
+    <style>
+        /* Önceki menü stillerini buraya ekleyin */
+        /* Yeni oyun ekranı stillerini buraya ekleyin */
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Önceki menü HTML'ini buraya ekleyin -->
+        
+        <!-- Yeni oyun ekranı HTML'ini buraya ekleyin -->
+    </div>
+
+    <script>
+        // Önceki menü JavaScript kodunu buraya ekleyin
+        
+        // Yeni oyun başlatma kodunu buraya ekleyin
+        
+        // Pencere boyutu değiştiğinde canvas'ı yeniden boyutlandır
+        window.addEventListener('resize', function() {
+            if (gameCanvas) {
+                gameCanvas.width = window.innerWidth;
+                gameCanvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
