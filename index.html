@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>3D Car Scene - BTC Full Game</title>
+  <title>3D Car Game with BTC</title>
   <style>
     body { margin: 0; overflow: hidden; background-color: #a0d7e6; font-family: sans-serif; touch-action: none; }
     canvas { display: block; }
@@ -45,15 +45,14 @@
     import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
     let scene, camera, renderer, carModel, enemyCar;
-    const coins = [];
-    const numCoins = 10;
-    const btcPerCoin = 0.0000001;
     let btcScore = 0;
-
+    const btcPerCoin = 0.0000001;
     let isStarted = false;
     let isGameOver = false;
     let moveLeft = false;
     let moveRight = false;
+    const coins = [];
+    const numCoins = 10;
 
     const scoreElement = document.getElementById('score');
     const gameOverElement = document.getElementById('game-over');
@@ -63,31 +62,43 @@
     const enemyBox = new THREE.Box3();
     const coinBox = new THREE.Box3();
 
-    const loader = new GLTFLoader();
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-    loader.setDRACOLoader(dracoLoader);
-
     function init() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xa0d7e6);
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer();
+
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      const light = new THREE.AmbientLight(0xffffff); scene.add(light);
-      const road = new THREE.Mesh(new THREE.PlaneGeometry(20, 200), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-      road.rotation.x = -Math.PI / 2; scene.add(road);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(10, 20, 10);
+      scene.add(ambientLight, directionalLight);
 
-      loader.load('https://threejs.org/examples/models/gltf/ferrari.glb', (gltf) => {
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(50, 200),
+        new THREE.MeshStandardMaterial({ color: 0x333333 })
+      );
+      ground.rotation.x = -Math.PI / 2;
+      scene.add(ground);
+
+      const loader = new GLTFLoader();
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+      loader.setDRACOLoader(dracoLoader);
+
+      loader.load('https://threejs.org/examples/models/gltf/ferrari.glb', gltf => {
         carModel = gltf.scene;
         carModel.scale.set(0.005, 0.005, 0.005);
         carModel.position.set(0, 0, -5);
         scene.add(carModel);
       });
 
-      enemyCar = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), new THREE.MeshStandardMaterial({ color: 0x0000ff }));
+      enemyCar = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 1, 4),
+        new THREE.MeshStandardMaterial({ color: 0x0000ff })
+      );
       enemyCar.position.set(0, 0.5, 20);
       scene.add(enemyCar);
 
@@ -134,7 +145,6 @@
 
     function update() {
       if (!isStarted || isGameOver || !carModel) return;
-
       if (moveLeft) carModel.position.x -= 0.2;
       if (moveRight) carModel.position.x += 0.2;
 
