@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>3D Car BTC Game</title>
+  <title>3D Endless BTC Runner</title>
   <style>
     body { margin: 0; overflow: hidden; background: #a0d7e6; font-family: sans-serif; touch-action: none; }
     canvas { display: block; }
@@ -44,10 +44,11 @@
 
     let scene, camera, renderer, carModel, enemyCar;
     const coins = [], buildings = [];
-    const numCoins = 10, numBuildings = 10;
+    const numCoins = 10, numBuildings = 20;
     const btcPerCoin = 0.0000001;
     let btcScore = 0, isStarted = false, isGameOver = false;
     let moveLeft = false, moveRight = false;
+    let roadSpeed = 0.3;
 
     const scoreElement = document.getElementById('score');
     const gameOverElement = document.getElementById('game-over');
@@ -58,30 +59,32 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xa0d7e6);
 
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(5,10,7);
+      dirLight.position.set(5, 10, 7);
       scene.add(ambientLight, dirLight);
 
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 200), new THREE.MeshStandardMaterial({ color: 0x333333 }));
-      ground.rotation.x = -Math.PI/2;
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 500), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.z = -250;
       scene.add(ground);
 
       for (let i = 0; i < numBuildings; i++) {
-        const geo = new THREE.BoxGeometry(4, Math.random()*10+5, 4);
+        const h = Math.random() * 20 + 10;
+        const geo = new THREE.BoxGeometry(4, h, 4);
         const mat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-        const buildingLeft = new THREE.Mesh(geo, mat);
-        const buildingRight = new THREE.Mesh(geo.clone(), mat.clone());
-        const z = i * -20;
-        buildingLeft.position.set(-10, geo.parameters.height/2, z);
-        buildingRight.position.set(10, geo.parameters.height/2, z);
-        scene.add(buildingLeft, buildingRight);
-        buildings.push(buildingLeft, buildingRight);
+        const left = new THREE.Mesh(geo, mat);
+        const right = new THREE.Mesh(geo.clone(), mat.clone());
+        const z = -i * 25;
+        left.position.set(-10, h / 2, z);
+        right.position.set(10, h / 2, z);
+        scene.add(left, right);
+        buildings.push(left, right);
       }
 
       const gltfLoader = new GLTFLoader();
@@ -91,19 +94,17 @@
 
       gltfLoader.load('https://threejs.org/examples/models/gltf/ferrari.glb', gltf => {
         carModel = gltf.scene;
-        carModel.scale.set(0.8, 0.8, 0.8);
-        carModel.position.set(0, 0.5, -5);
+        carModel.scale.set(0.008, 0.008, 0.008);
+        carModel.position.set(0, 0.5, 0);
+        carModel.rotation.y = Math.PI; // BACK FACING CAMERA
         scene.add(carModel);
       }, undefined, err => {
-        const fallback = new THREE.Mesh(new THREE.BoxGeometry(2,1,4), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-        fallback.position.set(0, 0.5, -5);
+        const fallback = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        fallback.position.set(0, 0.5, 0);
+        fallback.rotation.y = Math.PI;
         carModel = fallback;
         scene.add(fallback);
       });
-
-      enemyCar = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), new THREE.MeshStandardMaterial({ color: 0x0000ff }));
-      enemyCar.position.set(0, 0.5, 30);
-      scene.add(enemyCar);
 
       const coinGeo = new THREE.SphereGeometry(0.3, 8, 8);
       const coinMat = new THREE.MeshStandardMaterial({ color: 0xffff00 });
@@ -114,12 +115,16 @@
         scene.add(c);
       }
 
-      camera.position.set(0, 5, -15);
-      camera.lookAt(0, 0, 0);
+      enemyCar = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), new THREE.MeshStandardMaterial({ color: 0x0000ff }));
+      enemyCar.position.set(0, 0.5, -30);
+      scene.add(enemyCar);
+
+      camera.position.set(0, 5, 10);
+      camera.lookAt(0, 1, 0);
     }
 
     function resetCoin(c) {
-      c.position.set((Math.random() - 0.5) * 10, 0.3, Math.random() * 100);
+      c.position.set((Math.random() - 0.5) * 10, 0.3, -Math.random() * 200);
     }
 
     function collectCoin(c) {
@@ -134,7 +139,7 @@
       isGameOver = false;
       btcScore = parseFloat(localStorage.getItem('btcScore')) || 0;
       scoreElement.textContent = `BTC: ${btcScore.toFixed(8)} BTC`;
-      enemyCar.position.z = 50;
+      enemyCar.position.z = -30;
       gameOverElement.style.display = 'none';
       startScreen.style.display = 'none';
     }
@@ -148,8 +153,22 @@
 
     function update() {
       if (!isStarted || isGameOver || !carModel) return;
+
       if (moveLeft) carModel.position.x -= 0.2;
       if (moveRight) carModel.position.x += 0.2;
+
+      coins.forEach(c => {
+        c.position.z += roadSpeed;
+        if (c.position.z > 10) resetCoin(c);
+      });
+
+      enemyCar.position.z += roadSpeed;
+      if (enemyCar.position.z > 10) enemyCar.position.z = -200;
+
+      buildings.forEach(b => {
+        b.position.z += roadSpeed;
+        if (b.position.z > 10) b.position.z = -500;
+      });
 
       playerBox.setFromObject(carModel);
       enemyBox.setFromObject(enemyCar);
@@ -158,13 +177,10 @@
         return;
       }
 
-      for (let c of coins) {
+      coins.forEach(c => {
         coinBox.setFromObject(c);
         if (playerBox.intersectsBox(coinBox)) collectCoin(c);
-      }
-
-      enemyCar.position.z -= 0.5;
-      if (enemyCar.position.z < -10) enemyCar.position.z = 100;
+      });
     }
 
     function animate() {
