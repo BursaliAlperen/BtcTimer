@@ -1,246 +1,133 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>3D Car Scene - BTC Edition</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background-color: #a0d7e6;
-      font-family: sans-serif;
-      overscroll-behavior: none;
-      touch-action: none;
+    body { margin: 0; overflow: hidden; background-color: #a0d7e6; font-family: sans-serif; touch-action: none; }
+    canvas { display: block; }
+    #score, #game-over, #start-screen {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      color: white; text-shadow: 1px 1px 3px black;
+      z-index: 100; text-align: center;
     }
-    canvas {
-      display: block;
-    }
-    #loading-screen {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2em;
-      z-index: 100;
-      opacity: 1;
-      transition: opacity 0.5s ease-out;
-    }
-    #loading-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    #ui-container {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      text-shadow: 1px 1px 3px black;
-      z-index: 50;
-      font-size: 1.5em;
-    }
-    #score {
-      margin-bottom: 5px;
-    }
-    #game-over {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #ff4444;
-      font-size: 4em;
-      font-weight: bold;
-      text-align: center;
-      text-shadow: 2px 2px 5px black;
-      display: none;
-      z-index: 101;
-      pointer-events: none;
-    }
-    .control-button {
-      position: absolute;
-      bottom: 20px;
-      width: 80px;
-      height: 80px;
-      background-color: rgba(255, 255, 255, 0.3);
-      border: 2px solid rgba(0, 0, 0, 0.5);
-      border-radius: 50%;
-      z-index: 60;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2.5em;
-      color: rgba(0, 0, 0, 0.7);
-      user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
-      -moz-user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .control-button:active {
-      background-color: rgba(255, 255, 255, 0.5);
-    }
-    #left-button {
-      left: 20px;
-    }
-    #right-button {
-      right: 20px;
+    #score { top: 10px; font-size: 1.5em; }
+    #game-over, #start-screen {
+      top: 50%; transform: translate(-50%, -50%);
+      font-size: 2em; font-weight: bold; display: none;
     }
   </style>
 </head>
 <body>
-  <div id="loading-screen">Loading...</div>
-  <div id="container"></div>
-
-  <!-- UI Elements -->
-  <div id="ui-container">
-    <div id="score">BTC: 0.00000000 BTC</div>
-  </div>
-  <div id="game-over">GAME OVER!</div>
-
-  <!-- Mobile Control Buttons -->
-  <div id="left-button" class="control-button">◀</div>
-  <div id="right-button" class="control-button">▶</div>
-
-  <!-- Import Maps -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.164.1/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"
-      }
-    }
-  </script>
-
+  <div id="score">BTC: 0.00000000 BTC</div>
+  <div id="game-over">KAYBETTİN!<br>BTC: 0.00000000</div>
+  <div id="start-screen">BAŞLAMAK İÇİN DOKUN</div>
   <script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';let scene, camera, renderer, carModel, enemyCar;
+let btcScore = 0;
+const btcPerPoint = 0.0000001;
+let isStarted = false;
+let isGameOver = false;
 
-    let scene, camera, renderer, carModel, enemyCar;
-    let ambientLight, directionalLight;
-    const points = [];
-    const numPoints = 15;
-    const btcPerPoint = 0.0000001;
-    let btcScore = 0;
+const scoreElement = document.getElementById('score');
+const gameOverElement = document.getElementById('game-over');
+const startScreen = document.getElementById('start-screen');
 
-    let isGameOver = false;
+const playerBox = new THREE.Box3();
+const enemyBox = new THREE.Box3();
+const pointBox = new THREE.Box3();
+const points = [];
 
-    const scoreElement = document.getElementById('score');
-    const gameOverElement = document.getElementById('game-over');
-    const loadingScreen = document.getElementById('loading-screen');
+function init() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-    const loadingManager = new THREE.LoadingManager();
-    loadingManager.onLoad = () => {
-      loadingScreen.classList.add('hidden');
-      setTimeout(() => loadingScreen.remove(), 500);
-    };
+  const light = new THREE.AmbientLight(0xffffff); scene.add(light);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(100,100), new THREE.MeshBasicMaterial({ color: 0x555555 }));
+  ground.rotation.x = -Math.PI/2; scene.add(ground);
 
-    function init() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xa0d7e6);
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.getElementById('container').appendChild(renderer.domElement);
+  carModel = new THREE.Mesh(new THREE.BoxGeometry(2,1,4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+  carModel.position.y = 0.5; scene.add(carModel);
 
-      const groundGeo = new THREE.PlaneGeometry(200, 200);
-      const groundMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
-      const ground = new THREE.Mesh(groundGeo, groundMat);
-      ground.rotation.x = -Math.PI / 2;
-      scene.add(ground);
+  enemyCar = new THREE.Mesh(new THREE.BoxGeometry(2,1,4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+  enemyCar.position.set(2,0.5,20); scene.add(enemyCar);
 
-      ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(10, 10, 0);
-      scene.add(ambientLight, directionalLight);
+  const pointGeo = new THREE.SphereGeometry(0.3, 8, 8);
+  const pointMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  for (let i = 0; i < 10; i++) {
+    const p = new THREE.Mesh(pointGeo, pointMat);
+    resetPointPosition(p);
+    scene.add(p);
+    points.push(p);
+  }
 
-      // Fake car box
-      const carGeo = new THREE.BoxGeometry(2, 1, 4);
-      const carMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-      carModel = new THREE.Mesh(carGeo, carMat);
-      carModel.position.y = 0.5;
-      scene.add(carModel);
+  camera.position.set(0,5,-10);
+  camera.lookAt(0,0,0);
+  animate();
+}
 
-      // Enemy car
-      enemyCar = new THREE.Mesh(carGeo, new THREE.MeshStandardMaterial({ color: 0x0000ff }));
-      enemyCar.position.set(2, 0.5, 20);
-      scene.add(enemyCar);
+function startGame() {
+  isStarted = true;
+  isGameOver = false;
+  btcScore = parseFloat(localStorage.getItem('btcScore')) || 0;
+  scoreElement.textContent = `BTC: ${btcScore.toFixed(8)} BTC`;
+  gameOverElement.style.display = 'none';
+  startScreen.style.display = 'none';
+}
 
-      // Points
-      const pointGeo = new THREE.SphereGeometry(0.3, 8, 8);
-      const pointMat = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xaaaa00 });
-      for (let i = 0; i < numPoints; i++) {
-        const point = new THREE.Mesh(pointGeo, pointMat);
-        resetPointPosition(point);
-        scene.add(point);
-        points.push(point);
-      }
+function resetPointPosition(p) {
+  p.position.set((Math.random() - 0.5)*10, 0.3, Math.random()*50);
+}
 
-      camera.position.set(0, 5, -10);
-      camera.lookAt(0, 0, 10);
-    }
+function collect(p) {
+  btcScore += btcPerPoint;
+  localStorage.setItem('btcScore', btcScore.toFixed(8));
+  scoreElement.textContent = `BTC: ${btcScore.toFixed(8)} BTC`;
+  resetPointPosition(p);
+}
 
-    function resetPointPosition(point) {
-      point.position.set(
-        (Math.random() - 0.5) * 10,
-        0.3,
-        Math.random() * 100 + 10
-      );
-    }
+function triggerGameOver() {
+  isGameOver = true;
+  isStarted = false;
+  gameOverElement.innerHTML = `KAYBETTİN!<br><br>BTC: ${btcScore.toFixed(8)}`;
+  gameOverElement.style.display = 'block';
+}
 
-    const playerBox = new THREE.Box3();
-    const enemyBox = new THREE.Box3();
-    const pointBox = new THREE.Box3();
+function update() {
+  if (!isStarted || isGameOver) return;
 
-    function collectPoint(point) {
-      btcScore += btcPerPoint;
-      scoreElement.textContent = `BTC: ${btcScore.toFixed(8)} BTC`;
-      resetPointPosition(point);
-    }
+  playerBox.setFromObject(carModel);
+  enemyBox.setFromObject(enemyCar);
 
-    function triggerGameOver() {
-      isGameOver = true;
-      gameOverElement.innerHTML = `GAME OVER!<br><br>Kazandığınız BTC:<br><strong>${btcScore.toFixed(8)} BTC</strong>`;
-      gameOverElement.style.display = 'block';
-    }
+  if (playerBox.intersectsBox(enemyBox)) {
+    triggerGameOver();
+    return;
+  }
 
-    function animate() {
-      requestAnimationFrame(animate);
-      if (!isGameOver) update();
-      renderer.render(scene, camera);
-    }
+  for (let p of points) {
+    pointBox.setFromObject(p);
+    if (playerBox.intersectsBox(pointBox)) collect(p);
+  }
 
-    function update() {
-      playerBox.setFromObject(carModel);
-      enemyBox.setFromObject(enemyCar);
+  enemyCar.position.z -= 0.2;
+  if (enemyCar.position.z < -10) enemyCar.position.z = 50;
+}
 
-      if (playerBox.intersectsBox(enemyBox)) {
-        triggerGameOver();
-      }
+function animate() {
+  requestAnimationFrame(animate);
+  update();
+  renderer.render(scene, camera);
+}
 
-      for (const point of points) {
-        pointBox.setFromObject(point);
-        if (playerBox.intersectsBox(pointBox)) {
-          collectPoint(point);
-        }
-      }
+document.body.addEventListener('click', () => {
+  if (!isStarted || isGameOver) startGame();
+});
 
-      enemyCar.position.z -= 0.2;
-      if (enemyCar.position.z < -10) enemyCar.position.z = 100;
-    }
+init();
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    init();
-    animate();
   </script>
 </body>
 </html>
